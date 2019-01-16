@@ -10,7 +10,7 @@ option_list = list(
               help="A comma seperated list of bed files to intersect and merge"),
   make_option(c("-m", "--minOverlap"), action="store", default=NA, type='character',
               help="Number of files the peak should be in. Or proportion of files it should be in [default all]"),
-  make_option(c("-o", "--outFile"), action="store", default=NA, type='character',
+  make_option(c("-o", "--outfile"), action="store", default=NA, type='character',
               help="Output bed file with intersect and merge results [default STDOUT]")  
 )
 
@@ -22,11 +22,13 @@ bed.files <- unlist(strsplit(x = opt$bedfiles, split = ",", fixed = TRUE))
 # If minoverlap specfied use it else set to all the bed files
 if(is.na(opt$minOverlap)){
   minOverlap = length(bed.files)
+} else{
+  minOverlap = opt$minOverlap
 }
 
 # Get the intersecting and merged peaks
 out.bed.grange <- rizlib::intersectAndExtendBed(bedFiles = bed.files,
-                                minOverlap = opt$minOverlap)
+                                minOverlap = as.numeric(minOverlap))
 
 # Convert to a df for easier handling
 out.bed.df <- data.frame(chrom = GenomicRanges::seqnames(out.bed.grange),
@@ -34,8 +36,8 @@ out.bed.df <- data.frame(chrom = GenomicRanges::seqnames(out.bed.grange),
                          end = GenomicRanges::end(out.bed.grange))
 
 # If no output file specified print to STDOUT
-if(is.na(opt$outFile)){
+if(is.na(opt$outfile)){
   write.table(x=out.bed.df, file="", sep = "\t", row.names = FALSE, quote = FALSE, col.names = FALSE)
 }else{
-  write.table(x=out.bed.df, file=opt$outFile, sep = "\t", row.names = FALSE, quote = FALSE, col.names = FALSE)
+  write.table(x=out.bed.df, file=opt$outfile, sep = "\t", row.names = FALSE, quote = FALSE, col.names = FALSE)
 }
